@@ -17,10 +17,6 @@ if (indexArgs.length >=1) {
 
 const fs = require('fs')
 
-const tconsole = (tstring) => {
-    console.log(`${tstring}`)
-}
-
 const writeJSONDataToFile = ({fileToWrite, jsonData}) => {
     const jsonToWriteString = JSON.stringify(jsonData, null, 5)
     fs.writeFile(`output/people-data-${fileToWrite}.json`, jsonToWriteString, 'utf8', function (err) {
@@ -33,42 +29,66 @@ const writeJSONDataToFile = ({fileToWrite, jsonData}) => {
     })
 }
 
-const getDataFromNameTokens = (nameTokens) => {
-    tconsole(nameTokens)
-    nameTokens.map(t => t.trim)
-    tconsole(nameTokens)
-    writeJSONDataToFile(...DATA_TO_EXTRAPOLATE)
+const parseNameTokenFromLineTokens = (lineTokensToParse) => {
+    console.log(`lineTokensToParse`)
+    console.log(lineTokensToParse)
+    let nameTokens = []
+    if (lineTokensToParse) {
+        lineTokensToParse.forEach((tokens, i) => {
+            if (tokens.length >= 2 && tokens[0][0] !== ' ') {
+                let lastNameSplit = tokens[1].trim().split(" ")
+                nameTokens.push({first: tokens[0], last: lastNameSplit[0]})
+            }
+        })
+    }
+    return nameTokens
 }
 
-function fileStreamReadLines(fileStream, parser) {
-  var remaining = '';
+function fileStreamParseLines(fileStream, lineParser) {
+    return new Promise((resolve, reject) => {
+        let fileTokens = [];
+        let remaining = '';
 
-  fileStream.on('data', function(data) {
-    remaining += data;
-    var index = remaining.indexOf('\n');
-    while (index > -1) {
-      var line = remaining.substring(0, index);
-      remaining = remaining.substring(index + 1);
-      parser(line);
-      index = remaining.indexOf('\n');
-    }
-  });
+        fileStream.on('data', function(data) {
+            remaining += data;
+            let index = remaining.indexOf('\n');
+            while (index > -1) {
+              let line = remaining.substring(0, index);
+              remaining = remaining.substring(index + 1);
+              fileTokens.push(lineParser(line));
+              index = remaining.indexOf('\n');
+            }
+        });
 
-  fileStream.on('end', function() {
-    if (remaining.length > 0) {
-      parser(remaining);
-    }
-  });
+        fileStream.on('end', function() {
+            if (remaining.length > 0) {
+              fileTokens.push(lineParser(remaining));
+            }
+
+            resolve(fileTokens)
+        });
+    })
 }
 
-const parseTokensFromLine = (line) => {
-    let tokens = line.split(" ")
-    tconsole(`parseTokensFromLine ${tokens}`)
+const parseTokensByLine = (line) => {
+    let tokens = line.split(",")
+    console.log(`parseTokensByLine ${tokens.length}`)
+    console.log(tokens)
+    return tokens
 }
 
 const parseTokensFromFile = (fileToParse) => {
     let fileStream = fs.createReadStream(fileToParse);
-    fileStreamReadLines(fileStream, parseTokensFromLine);
+    return fileStreamParseLines(fileStream, parseTokensByLine);
 }
 
-parseTokensFromFile(fileToRead)
+const readAndParseNamesData = async (file) => {
+    let lineTokensFromFile = await parseTokensFromFile(file)
+    console.log(`readAndParseNamesData found n lines: ${lineTokensFromFile.length}`)
+    const nameTokensFromLines = parseNameTokenFromLineTokens(lineTokensFromFile)
+    console.log(nameTokensFromLines)
+    console.log(`parsed ${nameTokensFromLines.length} names`)
+}
+
+
+readAndParseNamesData(fileToRead)

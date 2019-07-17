@@ -17,7 +17,7 @@ if (indexArgs.length >=1) {
 
 const fs = require('fs')
 
-const writeJSONDataToFile = ({fileToWrite, jsonData}) => {
+const writeJSONDataToFile = (fileToWrite, jsonData) => {
     const jsonToWriteString = JSON.stringify(jsonData, null, 5)
     fs.writeFile(`output/people-data-${fileToWrite}.json`, jsonToWriteString, 'utf8', function (err) {
       if (err) {
@@ -82,13 +82,28 @@ const parseTokensFromFile = (fileToParse) => {
     return fileStreamParseLines(fileStream, parseTokensByLine);
 }
 
-const readAndParseNamesData = async (file) => {
-    let lineTokensFromFile = await parseTokensFromFile(file)
-    console.log(`readAndParseNamesData found n lines: ${lineTokensFromFile.length}`)
-    const nameTokensFromLines = parseNameTokenFromLineTokens(lineTokensFromFile)
-    console.log(nameTokensFromLines)
-    console.log(`parsed ${nameTokensFromLines.length} names`)
+const readFileAndParseNames = (file) => {
+    return new Promise(async (resolve, reject) => {
+        let lineTokensFromFile = await parseTokensFromFile(file)
+        console.log(`readAndParseNamesData found n lines: ${lineTokensFromFile.length}`)
+        const nameTokensFromLines = parseNameTokenFromLineTokens(lineTokensFromFile)
+        console.log(nameTokensFromLines)
+        console.log(`parsed ${nameTokensFromLines.length} names`)
+        resolve(nameTokensFromLines)
+    })
 }
 
+const countUniqueFullNames = (allNames) => {
+    console.log('count', allNames.length)
+    return allNames.length
+}
 
-readAndParseNamesData(fileToRead)
+const main = async() => {
+    const parsedNames = await readFileAndParseNames(fileToRead)
+    const namesFullCountUnique = countUniqueFullNames(parsedNames)
+    writeJSONDataToFile(fileToRead, {...DATA_TO_EXTRAPOLATE, 
+        names_full_count_unique: namesFullCountUnique
+    })
+}
+
+main()

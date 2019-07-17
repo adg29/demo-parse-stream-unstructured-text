@@ -1,6 +1,27 @@
 {
      "names_full_count_unique": 7,
-     "names_last_common": null,
+     "names_last_common": [
+          {
+               "last": "Joan",
+               "count": 3
+          },
+          {
+               "last": "John",
+               "count": 1
+          },
+          {
+               "last": "Sam",
+               "count": 1
+          },
+          {
+               "last": "Tom",
+               "count": 1
+          },
+          {
+               "last": "Cesar",
+               "count": 1
+          }
+     ],
      "names_first_common": null,
      "names_modified": null
 }

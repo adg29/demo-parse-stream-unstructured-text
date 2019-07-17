@@ -86,10 +86,10 @@ const parseTokensFromFile = (fileToParse) => {
 const readFileAndParseNames = (file) => {
     return new Promise(async (resolve, reject) => {
         let lineTokensFromFile = await parseTokensFromFile(file)
-        console.log(`readAndParseNamesData found n lines: ${lineTokensFromFile.length}`)
+        console.log(`lines count ${lineTokensFromFile.length}`)
         const nameTokensFromLines = parseNameTokenFromLineTokens(lineTokensFromFile)
         console.log(nameTokensFromLines)
-        console.log(`parsed ${nameTokensFromLines.length} names`)
+        console.log(`{first, last} objects count ${nameTokensFromLines.length}`)
         if (nameTokensFromLines.length > 0)
             resolve(nameTokensFromLines)
         else
@@ -110,26 +110,52 @@ const groupByLastName = (allNames) => {
             lastNamesTable[fullName.last][fullName.first] = 1
         }
     }) 
-    console.log(`groupByLastName lastNames count ${Object.keys(lastNamesTable).length}`)
+    console.log(`lastNames count ${Object.keys(lastNamesTable).length}`)
     return lastNamesTable;
 }
 
-const countUniqueFullNames = (lastNamesTable) => {
-    const lastNameValues = Object.values(lastNamesTable)
-    if (lastNameValues && lastNameValues.length > 0)
-        return lastNameValues.map(firstNamesList => Object.keys(firstNamesList).length).reduce((accumulator, currentValue) => accumulator + currentValue)
+const countUniqueFullNames = (lastNameBins) => {
+    if (lastNameBins && lastNameBins.length > 0)
+        return lastNameBins
+            .map(firstNamesList => Object.keys(firstNamesList).length)
+            .reduce((accumulator, currentValue) => accumulator + currentValue)
     else 
         return null
 
+}
+
+const calculateNameOccurenceRank = (nameBins, nameKey) => {
+    return Object.entries(nameBins)
+        .map(nameBin => {
+            let nameStats = {}
+            nameStats[nameKey] = nameBin[0],
+            nameStats.occurences = Object.values(nameBin[1]).reduce((accumulator, currentValue) => accumulator + currentValue)
+            return nameStats
+        })
+}
+
+const occurencesComparator = (a, b) => {
+    return b.occurences - a.occurences
 }
 
 const main = async() => {
     try {
         const parsedNames = await readFileAndParseNames(fileToRead)
         const lastNamesTable = groupByLastName(parsedNames)
-        const namesFullCountUnique = countUniqueFullNames(lastNamesTable)
+        const lastNameBins = Object.values(lastNamesTable)
+        const namesFullCountUnique = countUniqueFullNames(lastNameBins)
+        const namesLastCommon = calculateNameOccurenceRank(lastNamesTable, 'last')
+            .sort(occurencesComparator)
+        namesLastCommon.length = 10
+        const namesFirstCommon = calculateNameOccurenceRank(lastNamesTable, 'first')
+           .sort(occurencesComparator)
+        namesFirstCommon.length = 10
         writeJSONDataToFile(fileToRead, {...DATA_TO_EXTRAPOLATE, 
-            names_full_count_unique: namesFullCountUnique
+            ...{
+                names_full_count_unique: namesFullCountUnique,
+                names_last_common: namesLastCommon,
+                names_first_common: namesFirstCommon
+            }
         })
     } catch (e) {
         console.error('Caught error')

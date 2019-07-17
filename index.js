@@ -19,11 +19,12 @@ const fs = require('fs')
 
 const writeJSONDataToFile = (fileToWrite, jsonData) => {
     const jsonToWriteString = JSON.stringify(jsonData, null, 5)
-    fs.writeFile(`output/people-data-${fileToWrite}.json`, jsonToWriteString, 'utf8', function (err) {
+    const fileWritePath = `output/people-data-${fileToWrite}.json`;
+    fs.writeFile(fileWritePath, jsonToWriteString, 'utf8', function (err) {
       if (err) {
         throw err
       } else{
-        console.log(`Wrote data for ${fileToWrite}`)
+        console.log(`Wrote data for ${fileToWrite} to file ${fileWritePath}`)
         console.log(`${jsonToWriteString}`)
       }
     })
@@ -72,8 +73,8 @@ function fileStreamParseLines(fileStream, lineParser) {
 
 const parseTokensByLine = (line) => {
     let tokens = line.split(",")
-    console.log(`parseTokensByLine ${tokens.length}`)
-    console.log(tokens)
+    // console.log(`parseTokensByLine ${tokens.length}`)
+    // console.log(tokens)
     return tokens
 }
 
@@ -93,14 +94,36 @@ const readFileAndParseNames = (file) => {
     })
 }
 
-const countUniqueFullNames = (allNames) => {
-    console.log('count', allNames.length)
-    return allNames.length
+const groupByLastName = (allNames) => {
+    const lastNamesTable = {}
+    allNames.forEach(fullName => {
+        if (lastNamesTable[fullName.last]) {
+            if(lastNamesTable[fullName.last][fullName.first])
+                lastNamesTable[fullName.last][fullName.first]++
+            else
+                lastNamesTable[fullName.last][fullName.first] = 1
+        } else {
+            lastNamesTable[fullName.last] = {}
+            lastNamesTable[fullName.last][fullName.first] = 1
+        }
+    }) 
+    console.log(`groupByLastName lastNames count ${Object.keys(lastNamesTable).length}`)
+    return lastNamesTable;
+}
+
+const countUniqueFullNames = (lastNamesTable) => {
+    const lastNameValues = Object.values(lastNamesTable)
+    if (lastNameValues && lastNameValues.length > 0)
+        return lastNameValues.map(firstNamesList => Object.keys(firstNamesList).length).reduce((accumulator, currentValue) => accumulator + currentValue)
+    else 
+        return null
+
 }
 
 const main = async() => {
     const parsedNames = await readFileAndParseNames(fileToRead)
-    const namesFullCountUnique = countUniqueFullNames(parsedNames)
+    const lastNamesTable = groupByLastName(parsedNames)
+    const namesFullCountUnique = countUniqueFullNames(lastNamesTable)
     writeJSONDataToFile(fileToRead, {...DATA_TO_EXTRAPOLATE, 
         names_full_count_unique: namesFullCountUnique
     })

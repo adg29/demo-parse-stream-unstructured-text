@@ -1,0 +1,164 @@
+People Name Program 1.0
+=======================
+
+Description
+-----------
+
+Write a program that processes the included example file that contains
+people's names, outputs some statistics and generates updated output.
+
+Input:
+
+ . An arbitrary file with the same format as the attached example file. Your
+   program will be tested on much (e.g., 100x) larger files.
+
+
+Output:
+
+  1. The unique count of full, last, and first names (i.e., duplicates are
+     counted only once)
+  2. The ten most common last names (the names and number of occurrences
+     sorted in descending order)
+  3. The ten most common first names (the names and number of occurrences
+     sorted in descending order)
+  4. A list of modified names (see below for details)
+
+
+Assumptions About Names
+-----------------------
+
+Here are some assumptions you can make about names which are meant to
+make the program easier to write:
+
+. Names start at the beginning of the line.
+. Names follow these rules:
+  . Formatted "Lastname, Firstname"
+  . Alphabetic
+
+Names that don't follow those rules can be ignored.
+
+
+
+List of Modified Names
+--------------------------
+
+Take the first N names from the file where the following is true:
+
+  . No previous name has the same first name.
+  . No previous name has the same last name.
+
+  For example, consider these names:
+
+    Smith, Joan
+    Smith, John
+    Smith, Sam
+    Thomas, Joan
+    Upton, Joan
+    Upton, Tom
+    Vasquez, Cesar
+
+  These names would be part of the new list:
+
+    Smith, Joan
+    Upton, Tom
+    Vasquez, Cesar
+
+  These names would not:
+
+    Smith, John     # Already have a last name "Smith"
+    Smith, Sam      # Already have a last name "Smith"
+    Thomas, Joan    # Already have a first name "Joan"
+    Upton, Joan     # Already have a first name "Joan"
+
+Your program must support an arbitrary value for N, but for your example output
+you may use 25.
+
+After you have this list of 25 names, print a new list that contains 25
+modified names.  These modified names should only use first names and last
+names from the original 25 names.  However, the new list and the old list should
+not share any full names.
+
+  For example, if the file contains the names:
+
+    Brutananadilewski, Carl
+    Crews, Xander
+    Cartman, Eric
+    ... 22 more names ...
+
+  Then this is a valid output:
+
+    Brutananadilewski, Eric
+    Crews, Carl
+    Cartman, Xander
+    ... 22 more names ...
+
+  But this is not (because "Barney" and "Bambam" weren't in the original file):
+
+    Brutananadilewski, Fred
+    Crews, Barney
+    Cartman, Bambam
+    ... 22 more names ...
+
+  This is also incorrect (because "Cartman, Eric" is unchanged):
+
+    Brutananadilewski, Xander
+    Crews, Carl
+    Cartman, Eric
+    ... 22 more names ...
+
+  This is also incorrect (because "Carl" is used multiple times):
+
+    Brutananadilewski, Xander
+    Crews, Carl
+    Cartman, Carl
+    ... 22 more names ...
+
+
+
+Other Notes
+-----------
+
+. Our backend is written in PHP and our frontend is written in JavaScript.
+  We prefer you submit the coding test in either PHP or JavaScript (Node.js)
+. This exercise tests your knowledge of data sctructures and sorting.
+  Please, do not use embedded databases or non standard libraries.
+. The program should be as time and memory efficient as you can
+  make it. Keep in mind that your code will be executed against much
+  larger data sets! How does that affect your approach? Can you point
+  out what you specifically did in your design to address this?
+. The program should provide the correct answer. How did you test for
+  correctness?
+. You should provide the output of your program with your submission.
+. It should be easy for others compile and execute your submission. If necessary,
+  build tools (phing, gulp, grunt, webpack etc) can come in very handy for this.
+  Please, avoid submitting binaries and instead give instructions on
+  how to build and run your code. And above all, your code should
+  compile!
+. The program should be as concise and readable as possible.
+. Brief comments explaining implementation choices are welcome, but
+  not required.
+. You can hard code the name of the input file and the modified name
+  count into your program (to make it easier to write) but it should
+  otherwise be built to handle an arbitrary file with the same format
+  as the example file.
+
+
+
+Finishing Up
+------------
+
+Please, archive the following into a compressed file:
+* Your source code (no binaries or IDE specific files please).
+* Your build file and/or instructions on how to
+  compile your program.
+* A txt file with the output of your program.
+
+Upload your archive to Dropbox and forward the link to pkist@traackr.com. We
+are avoiding email for these submissions because attachments may get rejected.
+
+Thanks for investing the time to do this!  We believe this should
+take you about two to three hours to write assuming you have proficiency with
+your chosen programming language.
+
+If anything is unclear, shoot me an email at pkist@traackr.com and
+we'll get it cleared up.

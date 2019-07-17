@@ -5,17 +5,27 @@ const DATA_TO_EXTRAPOLATE = {
     names_modified: null
 }
 
-let fileToRead = 'coding-test-data.txt'
-let indexArgs = process.argv.slice(2)
-if (indexArgs.length >=1) {
-    const txtFileInput = indexArgs.find(arg => arg.indexOf('.txt') >= 1)
-    if (txtFileInput) {
-        fileToRead = txtFileInput
-    }
-    else throw new Error(`Expected input .txt file e.g. *.txt`)
+const ERRORS = {
+    INPUT: new Error(`Expected input .txt file e.g. *.txt`)
 }
 
 const fs = require('fs')
+
+const processArgs = () => {
+    let fileToRead = 'coding-test-data.txt'
+    let indexArgs = process.argv.slice(2)
+    if (indexArgs.length >=1) {
+        const txtFileInput = indexArgs.find(arg => arg.indexOf('.txt') >= 1)
+        if (txtFileInput) {
+            fileToRead = txtFileInput
+        }
+        else throw ERRORS.INPUT
+
+        return fileToRead
+    } else {
+        throw ERRORS.INPUT
+    }
+}
 
 const writeJSONDataToFile = (fileToWrite, jsonData) => {
     const jsonToWriteString = JSON.stringify(jsonData, null, 5)
@@ -140,7 +150,8 @@ const occurencesComparator = (a, b) => {
 
 const main = async() => {
     try {
-        const parsedNames = await readFileAndParseNames(fileToRead)
+        const fileName = processArgs()
+        const parsedNames = await readFileAndParseNames(fileName)
         const lastNamesTable = groupByLastName(parsedNames)
         const lastNameBins = Object.values(lastNamesTable)
         const namesFullCountUnique = countUniqueFullNames(lastNameBins)
@@ -150,7 +161,7 @@ const main = async() => {
         const namesFirstCommon = calculateNameOccurenceRank(lastNamesTable, 'first')
            .sort(occurencesComparator)
         namesFirstCommon.length = 10
-        writeJSONDataToFile(fileToRead, {...DATA_TO_EXTRAPOLATE, 
+        writeJSONDataToFile(fileName, {...DATA_TO_EXTRAPOLATE, 
             ...{
                 names_full_count_unique: namesFullCountUnique,
                 names_last_common: namesLastCommon,

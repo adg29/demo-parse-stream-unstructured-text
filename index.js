@@ -31,7 +31,7 @@ const writeJSONDataToFile = (fileToWrite, jsonData) => {
 }
 
 const parseNameTokenFromLineTokens = (lineTokensToParse) => {
-    console.log(`lineTokensToParse`)
+    // console.log(`lineTokensToParse`)
     console.log(lineTokensToParse)
     let nameTokens = []
     if (lineTokensToParse) {
@@ -90,7 +90,10 @@ const readFileAndParseNames = (file) => {
         const nameTokensFromLines = parseNameTokenFromLineTokens(lineTokensFromFile)
         console.log(nameTokensFromLines)
         console.log(`parsed ${nameTokensFromLines.length} names`)
-        resolve(nameTokensFromLines)
+        if (nameTokensFromLines.length > 0)
+            resolve(nameTokensFromLines)
+        else
+            reject(new Error(`Zero last names found in ${file}`))
     })
 }
 
@@ -121,12 +124,19 @@ const countUniqueFullNames = (lastNamesTable) => {
 }
 
 const main = async() => {
-    const parsedNames = await readFileAndParseNames(fileToRead)
-    const lastNamesTable = groupByLastName(parsedNames)
-    const namesFullCountUnique = countUniqueFullNames(lastNamesTable)
-    writeJSONDataToFile(fileToRead, {...DATA_TO_EXTRAPOLATE, 
-        names_full_count_unique: namesFullCountUnique
-    })
+    try {
+        const parsedNames = await readFileAndParseNames(fileToRead)
+        const lastNamesTable = groupByLastName(parsedNames)
+        const namesFullCountUnique = countUniqueFullNames(lastNamesTable)
+        writeJSONDataToFile(fileToRead, {...DATA_TO_EXTRAPOLATE, 
+            names_full_count_unique: namesFullCountUnique
+        })
+    } catch (e) {
+        console.error('Caught error')
+        console.log(e)
+        return
+    }
+
 }
 
 main()

@@ -9,6 +9,11 @@ const ERRORS = {
     INPUT: new Error(`Expected input .txt file e.g. *.txt`)
 }
 
+const DEFAULTS = {
+    TOP_N_NAMES: 10,
+    MODIFY_N_NAMES: 25
+}
+
 const fs = require('fs')
 
 const processArgs = () => {
@@ -47,8 +52,8 @@ const parseNameTokenFromLineTokens = (lineTokensToParse) => {
     if (lineTokensToParse) {
         lineTokensToParse.forEach((tokens, i) => {
             if (tokens.length >= 2 && tokens[0][0] !== ' ') {
-                let lastNameSplit = tokens[1].trim().split(" ")
-                nameTokens.push({first: tokens[0], last: lastNameSplit[0]})
+                let firstNameSplit = tokens[1].trim().split(" ")
+                nameTokens.push({last: tokens[0], first: firstNameSplit[0]})
             }
         })
     }
@@ -120,7 +125,7 @@ const groupByLastName = (allNames) => {
             lastNamesTable[fullName.last][fullName.first] = 1
         }
     }) 
-    console.log(`lastNames count ${Object.keys(lastNamesTable).length}`)
+    console.log(`lastNames unique count ${Object.keys(lastNamesTable).length}`)
     return lastNamesTable;
 }
 
@@ -135,17 +140,44 @@ const countUniqueFullNames = (lastNameBins) => {
 }
 
 const calculateNameOccurenceRank = (nameBins, nameKey) => {
-    return Object.entries(nameBins)
-        .map(nameBin => {
-            let nameStats = {}
-            nameStats[nameKey] = nameBin[0],
-            nameStats.occurences = Object.values(nameBin[1]).reduce((accumulator, currentValue) => accumulator + currentValue)
-            return nameStats
-        })
+    switch (nameKey) {
+        case 'first': 
+        case 'last':
+            return Object.entries(nameBins)
+                .map(nameBin => {
+                    let nameStats = {}
+                    nameStats[nameKey] = nameBin[0]
+                    nameStats.occurences = Object.values(nameBin[1]).reduce((accumulator, currentValue) => accumulator + currentValue)
+                    return nameStats
+                })
+            break;
+    }
 }
 
 const occurencesComparator = (a, b) => {
     return b.occurences - a.occurences
+}
+
+const modifyNames = (lastNameBins) => {
+    let uniqueFirstNames = []
+    let namesSubset = Object.entries(lastNameBins)
+        .map(lastNameBin => {
+            let nameUnique = {}
+            nameUnique.last = lastNameBin[0]
+
+            let lastNameFirstNameEntries = Object.entries(lastNameBin[1])
+            let lastNameFirstNameUnique = lastNameFirstNameEntries.find(entry => {
+                return !uniqueFirstNames.includes(entry[0])
+            })
+            if (lastNameFirstNameUnique) {
+                nameUnique.first = lastNameFirstNameUnique[0]
+                uniqueFirstNames.push(nameUnique.first)
+                return nameUnique
+            } else {
+                return null
+            }
+        })
+    return namesSubset
 }
 
 const main = async() => {
@@ -154,18 +186,25 @@ const main = async() => {
         const parsedNames = await readFileAndParseNames(fileName)
         const lastNamesTable = groupByLastName(parsedNames)
         const lastNameBins = Object.values(lastNamesTable)
+
         const namesFullCountUnique = countUniqueFullNames(lastNameBins)
+
         const namesLastCommon = calculateNameOccurenceRank(lastNamesTable, 'last')
             .sort(occurencesComparator)
-        namesLastCommon.length = 10
+        namesLastCommon.length = DEFAULTS.TOP_N_NAMES
+
         const namesFirstCommon = calculateNameOccurenceRank(lastNamesTable, 'first')
            .sort(occurencesComparator)
-        namesFirstCommon.length = 10
+        namesFirstCommon.length = DEFAULTS.TOP_N_NAMES
+
+        const namesModified = modifyNames(lastNamesTable)
+
         writeJSONDataToFile(fileName, {...DATA_TO_EXTRAPOLATE, 
             ...{
                 names_full_count_unique: namesFullCountUnique,
-                names_last_common: namesLastCommon,
-                names_first_common: namesFirstCommon
+                names_last_common: namesLastCommon.filter(common => common),
+                names_first_common: namesFirstCommon.filter(common => common),
+                names_modifed: namesModified
             }
         })
     } catch (e) {

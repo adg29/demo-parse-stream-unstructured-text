@@ -20,24 +20,27 @@
      ],
      "names_first_common": [
           {
-               "first": "Smith",
+               "name": "Joan",
                "occurences": 3
           },
           {
-               "first": "Upton",
-               "occurences": 2
-          },
-          {
-               "first": "Thomas",
+               "name": "John",
                "occurences": 1
           },
           {
-               "first": "Vasquez",
+               "name": "Sam",
+               "occurences": 1
+          },
+          {
+               "name": "Tom",
+               "occurences": 1
+          },
+          {
+               "name": "Cesar",
                "occurences": 1
           }
      ],
-     "names_modified": null,
-     "names_modifed": [
+     "names_modified": [
           {
                "last": "Smith",
                "first": "Joan"

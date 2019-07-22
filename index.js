@@ -189,25 +189,43 @@ const filterNames = (lastNameBins) => {
                 return null
             }
         })
-    return namesSubset
+    return namesSubset.filter(name => name)
 }
 
-const remixNames = (namesList) {
-    //recursive
-    //init remix set, set for last names, set for first names
+const remixNames = (namesList) => {
+    //init remix set array to build recursively
+    let remixedSet = []
+    //init set for first names
+    let firstNamesSet = namesList.map(n => n.first)
+
     //loop over last names
-    //get one from set of first names
-    //init first, last name combination
-    //find index of last, first name combination
-    //reject if combination is present
-    //push if combination is not present
+    let namesInitialSet = namesList.map(name => `${name.last}, ${name.first}`)
+    namesList.forEach((name) => {
+        let lastNamePart = name.last
+        //get one from set of first names
+        let firstNamePart = firstNamesSet.pop()
+        //init first, last name combination
+        const nameRemix = `${lastNamePart}, ${firstNamePart}`
+        //find index of last, first name combination
+        let remixValid = 
+            !remixedSet.includes(nameRemix) && !namesInitialSet.includes(nameRemix)
+        if (remixValid) {
+            //push to remixedSet if combination is not present in existing remix and initial set
+            remixedSet.push(nameRemix)
+        } else {
+            //push back into firstNamesSet if combination is present
+            firstNamesSet.push(firstNamePart)
+        }
+    })
+
+    return remixedSet.filter(r => r)
 }
 
 const modifyNames = (lastNameBins) => {
-    let filteredNames = filterNames(lastNameBins)
-    let remixedNames = remixNames(filterdNames)
+    let filteredNamesSet = filterNames(lastNameBins)
+    let remixedNamesSet = remixNames(filteredNamesSet)
 
-    return remixedNames
+    return remixedNamesSet
 }
 
 const main = async() => {

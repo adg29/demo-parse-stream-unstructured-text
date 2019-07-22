@@ -34,7 +34,7 @@ const processArgs = () => {
 
 const writeJSONDataToFile = (fileToWrite, jsonData) => {
     const jsonToWriteString = JSON.stringify(jsonData, null, 5)
-    const fileWritePath = `output/people-data-${fileToWrite}.json`;
+    const fileWritePath = `results-people-data-${fileToWrite}.json`
     fs.writeFile(fileWritePath, jsonToWriteString, 'utf8', function (err) {
       if (err) {
         throw err
@@ -142,12 +142,24 @@ const countUniqueFullNames = (lastNameBins) => {
 const calculateNameOccurenceRank = (nameBins, nameKey) => {
     switch (nameKey) {
         case 'first': 
+            let firstNameOccurences = {}
+            Object.entries(nameBins)
+                .forEach(lastNameBin => {
+                    Object.entries(lastNameBin[1]).forEach((firstNameEntry) => {
+                        if (firstNameOccurences[firstNameEntry[0]])
+                            firstNameOccurences[firstNameEntry[0]] += firstNameEntry[1]
+                        else
+                            firstNameOccurences[firstNameEntry[0]] = firstNameEntry[1]
+                    })
+                })
+
+            return Object.entries(firstNameOccurences).map(entry => ({name: entry[0], occurences: entry[1]}))
         case 'last':
             return Object.entries(nameBins)
-                .map(nameBin => {
+                .map(lastNameBin => {
                     let nameStats = {}
-                    nameStats[nameKey] = nameBin[0]
-                    nameStats.occurences = Object.values(nameBin[1]).reduce((accumulator, currentValue) => accumulator + currentValue)
+                    nameStats.last = lastNameBin[0]
+                    nameStats.occurences = Object.values(lastNameBin[1]).reduce((accumulator, currentValue) => accumulator + currentValue)
                     return nameStats
                 })
             break;
@@ -198,18 +210,19 @@ const main = async() => {
         namesFirstCommon.length = DEFAULTS.TOP_N_NAMES
 
         const namesModified = modifyNames(lastNamesTable)
+        namesModified.length = DEFAULTS.MODIFY_N_NAMES
 
         writeJSONDataToFile(fileName, {...DATA_TO_EXTRAPOLATE, 
             ...{
                 names_full_count_unique: namesFullCountUnique,
                 names_last_common: namesLastCommon.filter(common => common),
                 names_first_common: namesFirstCommon.filter(common => common),
-                names_modifed: namesModified
+                names_modified: namesModified
             }
         })
     } catch (e) {
-        console.error('Caught error')
-        console.log(e)
+        console.error('Stopped processing due to')
+        console.error(e)
         return
     }
 

@@ -189,6 +189,7 @@ const filterNames = (lastNameBins) => {
                 return null
             }
         })
+    namesSubset.length = DEFAULTS.MODIFY_N_NAMES
     return namesSubset.filter(name => name)
 }
 
@@ -199,8 +200,10 @@ const remixNames = (namesList) => {
     let firstNamesSet = namesList.map(n => n.first)
 
     //loop over last names
+    let namesListPointer = 0
     let namesInitialSet = namesList.map(name => `${name.last}, ${name.first}`)
-    namesList.forEach((name) => {
+    while (remixedSet.length < namesList.length) {
+    let name = namesList[namesListPointer]
         let lastNamePart = name.last
         //get one from set of first names
         let firstNamePart = firstNamesSet.pop()
@@ -212,11 +215,12 @@ const remixNames = (namesList) => {
         if (remixValid) {
             //push to remixedSet if combination is not present in existing remix and initial set
             remixedSet.push(nameRemix)
+            namesListPointer++
         } else {
-            //push back into firstNamesSet if combination is present
-            firstNamesSet.push(firstNamePart)
+            //shift back into firstNamesSet if combination is present
+            firstNamesSet = Array(1).fill(firstNamePart).concat(firstNamesSet)
         }
-    })
+    }
 
     return remixedSet.filter(r => r)
 }
@@ -246,7 +250,6 @@ const main = async() => {
         namesFirstCommon.length = DEFAULTS.TOP_N_NAMES
 
         const namesModified = modifyNames(lastNamesTable)
-        namesModified.length = DEFAULTS.MODIFY_N_NAMES
 
         writeJSONDataToFile(fileName, {...DATA_TO_EXTRAPOLATE, 
             ...{

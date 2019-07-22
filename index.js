@@ -170,7 +170,7 @@ const occurencesComparator = (a, b) => {
     return b.occurences - a.occurences
 }
 
-const modifyNames = (lastNameBins) => {
+const filterNames = (lastNameBins) => {
     let uniqueFirstNames = []
     let namesSubset = Object.entries(lastNameBins)
         .map(lastNameBin => {
@@ -190,6 +190,24 @@ const modifyNames = (lastNameBins) => {
             }
         })
     return namesSubset
+}
+
+const remixNames = (namesList) {
+    //recursive
+    //init remix set, set for last names, set for first names
+    //loop over last names
+    //get one from set of first names
+    //init first, last name combination
+    //find index of last, first name combination
+    //reject if combination is present
+    //push if combination is not present
+}
+
+const modifyNames = (lastNameBins) => {
+    let filteredNames = filterNames(lastNameBins)
+    let remixedNames = remixNames(filterdNames)
+
+    return remixedNames
 }
 
 const main = async() => {

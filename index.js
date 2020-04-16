@@ -47,7 +47,7 @@ const writeJSONDataToFile = (fileToWrite, jsonData) => {
 
 const parseNameTokenFromLineTokens = (lineTokensToParse) => {
     // console.log(`lineTokensToParse`)
-    console.log(lineTokensToParse)
+    // console.log(lineTokensToParse)
     let nameTokens = []
     if (lineTokensToParse) {
         lineTokensToParse.forEach((tokens, i) => {
@@ -103,7 +103,7 @@ const readFileAndParseNames = (file) => {
         let lineTokensFromFile = await parseTokensFromFile(file)
         console.log(`lines count ${lineTokensFromFile.length}`)
         const nameTokensFromLines = parseNameTokenFromLineTokens(lineTokensFromFile)
-        console.log(nameTokensFromLines)
+        // console.log(nameTokensFromLines)
         console.log(`{first, last} objects count ${nameTokensFromLines.length}`)
         if (nameTokensFromLines.length > 0)
             resolve(nameTokensFromLines)
